@@ -1043,6 +1043,11 @@ impl Session {
     }
 
     pub(crate) async fn maybe_emit_model_warnings_for_turn(&self, tc: &TurnContext) {
+        // localcode: a custom provider's models are never in the bundled
+        // catalog, so this warning is unavoidable noise on every local model.
+        if tc.config.model_provider_id != codex_model_provider_info::OPENAI_PROVIDER_ID {
+            return;
+        }
         if tc.model_info().used_fallback_model_metadata {
             self.send_event(
                 tc,
