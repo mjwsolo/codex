@@ -396,7 +396,7 @@ impl HistoryCell for SessionHeaderHistoryCell {
 
     fn raw_lines(&self) -> Vec<Line<'static>> {
         let mut lines = vec![
-            Line::from(format!("OpenAI Codex (v{})", self.version)),
+            Line::from(format!("localcode (v{})", self.version)),
             Line::from(format!(
                 "model: {}{}",
                 self.model,
