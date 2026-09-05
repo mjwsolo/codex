@@ -268,7 +268,7 @@ impl ChatWidget {
                     display: display.clone(),
                 });
             })];
-            if quant.current || (initial.is_none() && quant.recommended) {
+            if quant.current {
                 initial = Some(i);
             }
             items.push(SelectionItem {
@@ -281,6 +281,39 @@ impl ChatWidget {
                 search_value: Some(quant.label.clone()),
                 ..Default::default()
             });
+        }
+        // Same rule as localcode's Textual picker (_default_quant_idx): a naive
+        // Enter must reuse local weights, never start a multi-GB download.
+        // current > recommended-if-downloaded > largest downloaded no bigger
+        // than the recommendation > largest downloaded > recommended.
+        if initial.is_none() {
+            let rec = q.quants.iter().position(|x| x.recommended);
+            let downloaded: Vec<usize> = q
+                .quants
+                .iter()
+                .enumerate()
+                .filter(|(_, x)| x.downloaded)
+                .map(|(i, _)| i)
+                .collect();
+            initial = if downloaded.is_empty() {
+                rec
+            } else if let Some(r) = rec.filter(|r| downloaded.contains(r)) {
+                Some(r)
+            } else {
+                let rec_size = rec.map(|r| q.quants[r].size_gb).unwrap_or(f64::MAX);
+                let pool: Vec<usize> = downloaded
+                    .iter()
+                    .copied()
+                    .filter(|&i| q.quants[i].size_gb <= rec_size)
+                    .collect();
+                let pool = if pool.is_empty() { downloaded } else { pool };
+                pool.into_iter().max_by(|&a, &b| {
+                    q.quants[a]
+                        .size_gb
+                        .partial_cmp(&q.quants[b].size_gb)
+                        .unwrap_or(std::cmp::Ordering::Equal)
+                })
+            };
         }
         let mut title = format!("{} · {}", q.display_name, q.maker);
         if !q.license.is_empty() {
@@ -368,6 +401,7 @@ impl ChatWidget {
         let model = status.model.clone().unwrap_or_else(|| alias.clone());
         match status.state.as_str() {
             "downloading" => {
+                self.bottom_pane.ensure_status_indicator();
                 let detail = match (status.pct, status.detail.unwrap_or_default()) {
                     (_, d) if !d.trim().is_empty() => d,
                     (Some(p), _) => format!("{p}%"),
@@ -381,6 +415,7 @@ impl ChatWidget {
                 );
             }
             "loading" => {
+                self.bottom_pane.ensure_status_indicator();
                 self.bottom_pane.update_status(
                     format!("Loading {model}"),
                     Some("starting the local server…".to_string()),
