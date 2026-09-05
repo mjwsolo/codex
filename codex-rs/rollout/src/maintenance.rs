@@ -20,7 +20,7 @@ pub struct RolloutMaintenanceGuard {
     _file: File,
 }
 
-/// Try to exclude rollout compression and migration for one Codex home.
+/// Try to exclude rollout compression and migration for one localcode home.
 pub fn try_acquire_rollout_maintenance_lock(
     codex_home: &Path,
 ) -> io::Result<Option<RolloutMaintenanceGuard>> {

@@ -29,7 +29,7 @@ pub struct BuildInfo {
 }
 
 impl BuildInfo {
-    /// Return build information for the current Codex runtime.
+    /// Return build information for the current localcode runtime.
     pub fn get() -> Self {
         BUILD_INFO
             .get_or_init(|| Self::resolve(InstallContext::current(), "dev"))
@@ -72,7 +72,7 @@ impl BuildInfo {
         &self.version
     }
 
-    /// Format the version for a user-facing Codex header.
+    /// Format the version for a user-facing localcode header.
     pub fn display_version(&self) -> String {
         if self.build_commit == "dev" {
             "dev".to_string()

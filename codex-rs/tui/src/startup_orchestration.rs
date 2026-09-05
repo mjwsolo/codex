@@ -374,7 +374,7 @@ pub(super) async fn run_main_inner(
             &config,
             env!("CARGO_PKG_VERSION"),
             /*service_name_override*/ None,
-            /*default_analytics_enabled*/ true,
+            /*default_analytics_enabled*/ false, // localcode: nothing phones home
         )
     })) {
         Ok(Ok(otel)) => otel,

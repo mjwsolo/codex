@@ -236,7 +236,7 @@ impl PreparedMcpCall {
         &self.server_name
     }
 
-    /// Returns whether this call is bound to the host-owned Codex Apps server.
+    /// Returns whether this call is bound to the host-owned localcode Apps server.
     pub fn is_host_owned_apps(&self) -> bool {
         self.config
             .mcp_server_catalog
@@ -303,7 +303,7 @@ impl PreparedMcpCall {
     }
 
     /// Runs irreversible call preparation and execution under the authority of
-    /// this call's exact catalog revision and the extensions owned by the Codex session.
+    /// this call's exact catalog revision and the extensions owned by the localcode session.
     /// A caller-supplied timeout can further restrict the server's configured timeout.
     #[expect(
         clippy::await_holding_invalid_type,

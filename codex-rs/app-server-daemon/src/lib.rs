@@ -262,7 +262,7 @@ fn ensure_supported_platform() -> Result<()> {
 #[cfg(not(any(unix, windows)))]
 fn ensure_supported_platform() -> Result<()> {
     Err(anyhow!(
-        "codex app-server daemon lifecycle is only supported on Unix and Windows platforms"
+        "localcode app-server daemon lifecycle is only supported on Unix and Windows platforms"
     ))
 }
 
@@ -354,7 +354,7 @@ impl Daemon {
             && self.running_backend(&settings).await?.is_none()
         {
             return Err(anyhow!(
-                "app server is running but is not managed by codex app-server daemon"
+                "app server is running but is not managed by localcode app-server daemon"
             ));
         }
 
@@ -410,7 +410,7 @@ impl Daemon {
             }
         } else if client::probe(&self.socket_path).await.is_ok() {
             return Err(anyhow!(
-                "app server is running but is not managed by codex app-server daemon"
+                "app server is running but is not managed by localcode app-server daemon"
             ));
         } else {
             RestartIfRunningOutcome::NotRunning
@@ -448,7 +448,7 @@ impl Daemon {
 
         if client::probe(&self.socket_path).await.is_ok() {
             return Err(anyhow!(
-                "app server is running but is not managed by codex app-server daemon"
+                "app server is running but is not managed by localcode app-server daemon"
             ));
         }
 
@@ -563,7 +563,7 @@ impl Daemon {
 
         if backend.is_none() && client::probe(&self.socket_path).await.is_ok() {
             return Err(anyhow!(
-                "app server is running but is not managed by codex app-server daemon"
+                "app server is running but is not managed by localcode app-server daemon"
             ));
         }
 
@@ -623,7 +623,7 @@ impl Daemon {
             && self.running_backend(&settings).await?.is_none()
         {
             return Err(anyhow!(
-                "app server is running but is not managed by codex app-server daemon"
+                "app server is running but is not managed by localcode app-server daemon"
             ));
         }
         settings.save(&self.settings_file).await?;

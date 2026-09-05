@@ -129,7 +129,31 @@ pub fn map_api_error(err: ApiError) -> CodexErr {
                         CodexErr::InvalidRequest(body_text)
                     }
                 } else if status == http::StatusCode::INTERNAL_SERVER_ERROR {
-                    CodexErr::InternalServerError
+                    // A local model server says what went wrong (e.g. "Failed to
+                    // parse tool call arguments as JSON"). Show that instead of
+                    // a generic "high demand" line that hides the real cause.
+                    let server_message = serde_json::from_str::<Value>(&body_text)
+                        .ok()
+                        .and_then(|v| {
+                            v.get("error")
+                                .and_then(|e| e.get("message"))
+                                .and_then(Value::as_str)
+                                .map(str::to_string)
+                        })
+                        .filter(|m| !m.trim().is_empty());
+                    match server_message {
+                        Some(message) => CodexErr::UnexpectedStatus(UnexpectedResponseError {
+                            status,
+                            user_message: Some(format!("The model server returned an error: {message}")),
+                            body: body_text,
+                            url,
+                            cf_ray: None,
+                            request_id: extract_request_id(headers.as_ref()),
+                            identity_authorization_error: None,
+                            identity_error_code: None,
+                        }),
+                        None => CodexErr::InternalServerError,
+                    }
                 } else if status == http::StatusCode::TOO_MANY_REQUESTS {
                     if let Ok(err) = serde_json::from_str::<UsageErrorResponse>(&body_text) {
                         if err.error.error_type.as_deref() == Some("usage_limit_reached") {

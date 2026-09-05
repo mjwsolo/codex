@@ -277,7 +277,7 @@ pub(crate) enum PreToolUseDecisionWire {
 #[schemars(rename = "pre-tool-use.command.input")]
 pub(crate) struct PreToolUseCommandInput {
     pub session_id: String,
-    /// Codex extension: expose the active turn id to internal turn-scoped hooks.
+    /// localcode extension: expose the active turn id to internal turn-scoped hooks.
     pub turn_id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub agent_id: Option<String>,
@@ -300,7 +300,7 @@ pub(crate) struct PreToolUseCommandInput {
 #[schemars(rename = "permission-request.command.input")]
 pub(crate) struct PermissionRequestCommandInput {
     pub session_id: String,
-    /// Codex extension: expose the active turn id to internal turn-scoped hooks.
+    /// localcode extension: expose the active turn id to internal turn-scoped hooks.
     pub turn_id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub agent_id: Option<String>,
@@ -322,7 +322,7 @@ pub(crate) struct PermissionRequestCommandInput {
 #[schemars(rename = "post-tool-use.command.input")]
 pub(crate) struct PostToolUseCommandInput {
     pub session_id: String,
-    /// Codex extension: expose the active turn id to internal turn-scoped hooks.
+    /// localcode extension: expose the active turn id to internal turn-scoped hooks.
     pub turn_id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub agent_id: Option<String>,
@@ -346,7 +346,7 @@ pub(crate) struct PostToolUseCommandInput {
 #[schemars(rename = "pre-compact.command.input")]
 pub(crate) struct PreCompactCommandInput {
     pub session_id: String,
-    /// Codex extension: expose the active turn id to internal turn-scoped hooks.
+    /// localcode extension: expose the active turn id to internal turn-scoped hooks.
     pub turn_id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub agent_id: Option<String>,
@@ -366,7 +366,7 @@ pub(crate) struct PreCompactCommandInput {
 #[schemars(rename = "post-compact.command.input")]
 pub(crate) struct PostCompactCommandInput {
     pub session_id: String,
-    /// Codex extension: expose the active turn id to internal turn-scoped hooks.
+    /// localcode extension: expose the active turn id to internal turn-scoped hooks.
     pub turn_id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub agent_id: Option<String>,
@@ -548,7 +548,7 @@ impl SessionStartCommandInput {
 #[schemars(rename = "subagent-start.command.input")]
 pub(crate) struct SubagentStartCommandInput {
     pub session_id: String,
-    /// Codex extension: expose the active turn id to internal turn-scoped hooks.
+    /// localcode extension: expose the active turn id to internal turn-scoped hooks.
     pub turn_id: String,
     pub transcript_path: NullableString,
     pub cwd: String,
@@ -566,7 +566,7 @@ pub(crate) struct SubagentStartCommandInput {
 #[schemars(rename = "user-prompt-submit.command.input")]
 pub(crate) struct UserPromptSubmitCommandInput {
     pub session_id: String,
-    /// Codex extension: expose the active turn id to internal turn-scoped hooks.
+    /// localcode extension: expose the active turn id to internal turn-scoped hooks.
     pub turn_id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub agent_id: Option<String>,
@@ -587,7 +587,7 @@ pub(crate) struct UserPromptSubmitCommandInput {
 #[schemars(rename = "stop.command.input")]
 pub(crate) struct StopCommandInput {
     pub session_id: String,
-    /// Codex extension: expose the active turn id to internal turn-scoped hooks.
+    /// localcode extension: expose the active turn id to internal turn-scoped hooks.
     pub turn_id: String,
     pub transcript_path: NullableString,
     pub cwd: String,
@@ -605,7 +605,7 @@ pub(crate) struct StopCommandInput {
 #[schemars(rename = "subagent-stop.command.input")]
 pub(crate) struct SubagentStopCommandInput {
     pub session_id: String,
-    /// Codex extension: expose the active turn id to internal turn-scoped hooks.
+    /// localcode extension: expose the active turn id to internal turn-scoped hooks.
     pub turn_id: String,
     pub transcript_path: NullableString,
     pub agent_transcript_path: NullableString,
@@ -626,7 +626,7 @@ pub(crate) struct SubagentStopCommandInput {
 #[schemars(rename = "interrupt.command.input")]
 pub(crate) struct InterruptCommandInput {
     pub session_id: String,
-    /// Codex extension: expose the active turn id to internal turn-scoped hooks.
+    /// localcode extension: expose the active turn id to internal turn-scoped hooks.
     pub turn_id: String,
     pub transcript_path: NullableString,
     pub cwd: String,

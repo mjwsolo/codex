@@ -328,7 +328,7 @@ pub enum GuardianReviewSessionKind {
 #[derive(Clone, Copy, Debug, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum GuardianApprovalRequestSource {
-    /// Approval requested directly by the main Codex turn.
+    /// Approval requested directly by the main localcode turn.
     MainTurn,
     /// Approval requested by a delegated subagent and routed through the parent
     /// session for guardian review.

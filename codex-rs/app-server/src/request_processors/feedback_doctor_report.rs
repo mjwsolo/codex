@@ -31,10 +31,10 @@ pub(crate) struct DoctorFeedbackReport {
     pub(crate) tags: BTreeMap<String, String>,
 }
 
-/// Runs `codex --cd <workspace> doctor --json --feedback` and returns a best-effort
+/// Runs `localcode --cd <workspace> doctor --json --feedback` and returns a best-effort
 /// feedback attachment.
 ///
-/// Failure to spawn Codex, finish before the timeout, or parse JSON means the
+/// Failure to spawn localcode, finish before the timeout, or parse JSON means the
 /// feedback upload proceeds without the doctor report. Callers should merge the
 /// returned tags without overriding explicit client-provided tags.
 pub(crate) async fn doctor_feedback_report(

@@ -1654,6 +1654,31 @@ impl App {
                 self.chat_widget
                     .open_plan_reasoning_scope_prompt(model, effort);
             }
+            AppEvent::LocalcodeCatalogLoaded { result } => {
+                self.chat_widget.on_localcode_catalog_loaded(result);
+            }
+            AppEvent::LocalcodeOpenQuants { group } => {
+                if let Some(base) = crate::chatwidget::localcode_control_url() {
+                    self.chat_widget.open_localcode_quants(base, group);
+                }
+            }
+            AppEvent::LocalcodeQuantsLoaded { result } => {
+                self.chat_widget.on_localcode_quants_loaded(result);
+            }
+            AppEvent::LocalcodeSelectQuant {
+                group,
+                filename,
+                alias,
+                display,
+            } => {
+                if let Some(base) = crate::chatwidget::localcode_control_url() {
+                    self.chat_widget
+                        .localcode_select_quant(base, group, filename, alias, display);
+                }
+            }
+            AppEvent::LocalcodeSwitchStatus { result } => {
+                self.chat_widget.on_localcode_switch_status(result);
+            }
             AppEvent::OpenAllModelsPopup => {
                 self.chat_widget.open_all_models_popup();
             }
@@ -2620,7 +2645,7 @@ impl App {
             #[cfg(any(unix, windows))]
             AppEvent::AgentsDaemonStarted { result } => match result {
                 Ok(()) => self.chat_widget.add_info_message(
-                    "Background server started. Run `codex agents` in another terminal; this session remains unchanged."
+                    "Background server started. Run `localcode agents` in another terminal; this session remains unchanged."
                         .to_string(),
                     /*hint*/ None,
                 ),

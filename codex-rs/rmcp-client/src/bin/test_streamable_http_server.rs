@@ -410,7 +410,7 @@ impl TestToolServer {
 
     fn memo_template() -> ResourceTemplate {
         ResourceTemplate::new("memo://codex/{slug}", "codex-memo")
-            .with_title("Codex Memo")
+            .with_title("localcode Memo")
             .with_description("Template for memo://codex/{slug} resources used in tests.")
             .with_mime_type("text/plain")
     }

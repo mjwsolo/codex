@@ -99,7 +99,7 @@ impl SlashCommand {
             SlashCommand::Delete => "permanently delete this session and exit",
             SlashCommand::Clear => "clear the terminal and start a new chat",
             SlashCommand::Fork => "fork the current chat",
-            SlashCommand::App => "continue this session in the Desktop app",
+            SlashCommand::App => "not available in localcode (everything runs locally)",
             SlashCommand::Quit | SlashCommand::Exit => "exit localcode",
             SlashCommand::Copy => "copy the last response, code block, or quote",
             SlashCommand::Export => "export the conversation as markdown",

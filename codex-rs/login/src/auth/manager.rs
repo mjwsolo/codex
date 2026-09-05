@@ -85,7 +85,7 @@ pub enum CodexAuth {
     BedrockAccessKeys(BedrockAccessKeysAuth),
 }
 
-/// Policy for resolving Agent Identity auth from a broader Codex auth snapshot.
+/// Policy for resolving Agent Identity auth from a broader localcode auth snapshot.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AgentIdentityAuthPolicy {
     /// Use Agent Identity auth only when the current auth is already Agent Identity.
@@ -575,12 +575,12 @@ impl CodexAuth {
             )),
             Self::PersonalAccessToken(auth) => Ok(auth.access_token().to_string()),
             Self::BedrockApiKey(_) | Self::BedrockAccessKeys(_) => Err(std::io::Error::other(
-                "Bedrock API key auth does not expose a Codex bearer token",
+                "Bedrock API key auth does not expose a localcode bearer token",
             )),
         }
     }
 
-    /// Returns `None` if Codex backend auth does not expose an account id.
+    /// Returns `None` if localcode backend auth does not expose an account id.
     pub fn get_account_id(&self) -> Option<String> {
         match self {
             Self::Headers(headers) => headers
@@ -595,7 +595,7 @@ impl CodexAuth {
         }
     }
 
-    /// Returns false if Codex backend auth omits the FedRAMP claim.
+    /// Returns false if localcode backend auth omits the FedRAMP claim.
     pub fn is_fedramp_account(&self) -> bool {
         match self {
             Self::Headers(_) => false,
@@ -607,7 +607,7 @@ impl CodexAuth {
         }
     }
 
-    /// Returns `None` if Codex backend auth does not expose an account email.
+    /// Returns `None` if localcode backend auth does not expose an account email.
     pub fn get_account_email(&self) -> Option<String> {
         match self {
             Self::Headers(_) => None,
@@ -617,7 +617,7 @@ impl CodexAuth {
         }
     }
 
-    /// Returns `None` if Codex backend auth does not expose a ChatGPT user id.
+    /// Returns `None` if localcode backend auth does not expose a ChatGPT user id.
     pub fn get_chatgpt_user_id(&self) -> Option<String> {
         match self {
             Self::Headers(_) => None,
@@ -2057,7 +2057,7 @@ pub struct AuthManager {
 /// `codex_core::config::Config`, but this trait keeps `codex-login` independent
 /// from `codex-core`.
 pub trait AuthManagerConfig {
-    /// Returns the Codex home directory used for auth storage.
+    /// Returns the localcode home directory used for auth storage.
     fn codex_home(&self) -> PathBuf;
 
     /// Returns the CLI auth credential storage mode for auth loading.

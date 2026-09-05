@@ -150,7 +150,7 @@ impl AsRef<str> for McpServerEnvVar {
     }
 }
 
-/// OAuth client settings used when Codex launches an MCP OAuth flow.
+/// OAuth client settings used when localcode launches an MCP OAuth flow.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct McpServerOAuthConfig {
@@ -162,12 +162,12 @@ pub struct McpServerOAuthConfig {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub callback_url: Option<String>,
 
-    /// Fixed callback port that takes precedence over Codex's global OAuth callback port.
+    /// Fixed callback port that takes precedence over localcode's global OAuth callback port.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub callback_port: Option<u16>,
 }
 
-/// Authentication flow Codex attempts after resolving an HTTP MCP server's
+/// Authentication flow localcode attempts after resolving an HTTP MCP server's
 /// configured bearer token and authorization headers, which always take
 /// precedence. ChatGPT authentication falls back to stored OAuth credentials
 /// when its session provider is unavailable; both modes ultimately fall back
@@ -202,14 +202,14 @@ pub struct McpServerConfig {
     #[serde(default, skip_serializing_if = "McpServerAuth::is_default")]
     pub auth: McpServerAuth,
 
-    /// Effective environment id for where Codex should start this MCP server.
+    /// Effective environment id for where localcode should start this MCP server.
     pub environment_id: String,
 
-    /// When `false`, Codex skips initializing this MCP server.
+    /// When `false`, localcode skips initializing this MCP server.
     #[serde(default = "default_enabled")]
     pub enabled: bool,
 
-    /// When `true`, `codex exec` exits with an error if this MCP server fails to initialize.
+    /// When `true`, `localcode exec` exits with an error if this MCP server fails to initialize.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub required: bool,
 

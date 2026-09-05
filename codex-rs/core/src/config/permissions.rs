@@ -479,7 +479,7 @@ pub(crate) fn reject_unknown_builtin_permission_profile(profile_name: &str) -> i
 }
 
 /// Returns a list of paths that must be readable by shell tools in order
-/// for Codex to function. These should always be added to the
+/// for localcode to function. These should always be added to the
 /// `FileSystemSandboxPolicy` for a thread.
 pub(crate) fn get_readable_roots_required_for_codex_runtime(
     codex_home: &Path,
@@ -893,7 +893,7 @@ fn push_warning(startup_warnings: &mut Vec<String>, message: String) {
 
 fn missing_filesystem_entries_warning(profile_name: &str) -> String {
     format!(
-        "Permissions profile `{profile_name}` does not define any recognized filesystem entries for this version of Codex. Filesystem access will remain restricted. Upgrade Codex if this profile expects filesystem permissions."
+        "Permissions profile `{profile_name}` does not define any recognized filesystem entries for this version of localcode. Filesystem access will remain restricted. Upgrade localcode if this profile expects filesystem permissions."
     )
 }
 
@@ -908,10 +908,10 @@ fn maybe_push_unknown_special_path_warning(
         startup_warnings,
         match subpath.as_deref() {
             Some(subpath) => format!(
-                "Configured filesystem path `{path}` with nested entry `{subpath}` is not recognized by this version of Codex and will be ignored. Upgrade Codex if this path is required."
+                "Configured filesystem path `{path}` with nested entry `{subpath}` is not recognized by this version of localcode and will be ignored. Upgrade localcode if this path is required."
             ),
             None => format!(
-                "Configured filesystem path `{path}` is not recognized by this version of Codex and will be ignored. Upgrade Codex if this path is required."
+                "Configured filesystem path `{path}` is not recognized by this version of localcode and will be ignored. Upgrade localcode if this path is required."
             ),
         },
     );

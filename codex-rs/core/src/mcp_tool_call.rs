@@ -799,7 +799,7 @@ async fn refresh_codex_apps_after_connector_auth(sess: &Arc<Session>, turn_conte
             );
         }
         Err(err) => {
-            tracing::warn!("failed to refresh Codex Apps tools after connector auth: {err:#}");
+            tracing::warn!("failed to refresh localcode Apps tools after connector auth: {err:#}");
         }
     }
 }

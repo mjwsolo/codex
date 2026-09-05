@@ -13,7 +13,7 @@ use codex_protocol::shell_environment::is_non_inheritable_env_var;
 /// Experimental environment variable that will be set to some non-empty value
 /// if both of the following are true:
 ///
-/// 1. The process was spawned by Codex as part of a shell tool call.
+/// 1. The process was spawned by localcode as part of a shell tool call.
 /// 2. NetworkSandboxPolicy is restricted for the tool call.
 ///
 /// We may try to have just one environment variable for all sandboxing

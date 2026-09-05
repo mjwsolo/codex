@@ -16,7 +16,7 @@ use super::describe_install_context;
 use super::doctor_install_context;
 use super::push_path_detail;
 
-/// Builds the process provenance row for the current Codex executable.
+/// Builds the process provenance row for the current localcode executable.
 ///
 /// This check is informational and should not fail on its own; inconsistent
 /// install state is reported by the installation and update checks instead.
@@ -99,7 +99,7 @@ pub(super) fn search_check() -> DoctorCheck {
     };
     let mut check = DoctorCheck::new("runtime.search", "search", status, summary).details(details);
     if status != CheckStatus::Ok {
-        check = check.remediation("Install ripgrep or repair the bundled Codex package.");
+        check = check.remediation("Install ripgrep or repair the bundled localcode package.");
     }
     check
 }

@@ -40,7 +40,7 @@ pub(super) fn validate_request(request: &[u8]) -> Result<ProvisioningRequest> {
         bail!("expected a sandbox provisioning request");
     };
     if request.codex_home.is_empty() || request.codex_home.contains(['\0', '\r', '\n']) {
-        bail!("Codex home is empty or contains an invalid control character");
+        bail!("localcode home is empty or contains an invalid control character");
     }
     let mut settings = request.settings;
     let mut listeners = request.listeners;

@@ -241,7 +241,7 @@ pub(super) fn sandbox_check(config: &Config, arg0_paths: &Arg0DispatchPaths) -> 
                         | SetupErrorCode::OrchestratorHelperReportReadFailed
                         | SetupErrorCode::OrchestratorHelperIncomplete
                         | SetupErrorCode::HelperReadAclHelperSpawnFailed => {
-                            "repair the installed Codex helpers or ask IT to allow their execution"
+                            "repair the installed localcode helpers or ask IT to allow their execution"
                         }
                         SetupErrorCode::HelperUserProvisionFailed
                         | SetupErrorCode::HelperUsersGroupCreateFailed
@@ -257,19 +257,19 @@ pub(super) fn sandbox_check(config: &Config, arg0_paths: &Arg0DispatchPaths) -> 
                         | SetupErrorCode::HelperUsersFileWriteFailed
                         | SetupErrorCode::HelperSetupMarkerWriteFailed
                         | SetupErrorCode::HelperSandboxLockFailed => {
-                            "rerun elevated setup for the authoritative Codex home or ask IT"
+                            "rerun elevated setup for the authoritative localcode home or ask IT"
                         }
                         SetupErrorCode::HelperFirewallComInitFailed
                         | SetupErrorCode::HelperFirewallPolicyAccessFailed
                         | SetupErrorCode::HelperFirewallPolicyIneffective
                         | SetupErrorCode::HelperFirewallRuleCreateOrAddFailed
                         | SetupErrorCode::HelperFirewallRuleVerifyFailed => {
-                            "ask IT to allow Codex sandbox rules in managed Windows Firewall policy"
+                            "ask IT to allow localcode sandbox rules in managed Windows Firewall policy"
                         }
                         SetupErrorCode::OrchestratorPayloadSerializeFailed
                         | SetupErrorCode::HelperRequestArgsFailed
                         | SetupErrorCode::HelperUnknownError => {
-                            "repair or reinstall the Codex CLI from an approved distribution"
+                            "repair or reinstall localcode from an approved distribution"
                         }
                     };
                     check

@@ -138,7 +138,7 @@ pub const CONTEXT_WINDOW_OPEN_TAG: &str = "<context_window>";
 pub const CONTEXT_WINDOW_CLOSE_TAG: &str = "</context_window>";
 pub const CONTEXT_WINDOW_GUIDANCE_OPEN_TAG: &str = "<context_window_guidance>";
 pub const CONTEXT_WINDOW_GUIDANCE_CLOSE_TAG: &str = "</context_window_guidance>";
-pub const USER_MESSAGE_BEGIN: &str = "## My request for Codex:";
+pub const USER_MESSAGE_BEGIN: &str = "## My request for localcode:";
 
 /// Removes the model-context prefix from a user message before displaying it.
 pub fn strip_user_message_prefix(text: &str) -> &str {
@@ -216,19 +216,19 @@ pub struct W3cTraceContext {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ConversationStartParams {
-    /// Whether Codex response handoffs are managed through explicit client append calls.
+    /// Whether localcode response handoffs are managed through explicit client append calls.
     pub client_managed_handoffs: bool,
     /// Whether a realtime V3 delegation produces an acknowledgement filler.
     /// `None` preserves the Realtime API's default behavior.
     pub delegation_ack_filler: Option<bool>,
-    /// Whether to route any remaining transcript tail through Codex when the session ends.
+    /// Whether to route any remaining transcript tail through localcode when the session ends.
     /// TODO: Remove this rollout knob once transcript-tail flushing is always enabled.
     pub flush_transcript_tail_on_session_end: bool,
-    /// Sends automatic Codex responses as realtime conversation items instead of handoff appends.
+    /// Sends automatic localcode responses as realtime conversation items instead of handoff appends.
     pub codex_responses_as_items: bool,
-    /// Optional prefix added to automatic Codex response items when `codex_responses_as_items` is set.
+    /// Optional prefix added to automatic localcode response items when `codex_responses_as_items` is set.
     pub codex_response_item_prefix: Option<String>,
-    /// Selects how automatic Codex handoffs are routed in Frameless Bidi sessions.
+    /// Selects how automatic localcode handoffs are routed in Frameless Bidi sessions.
     /// Realtime V1 and V2 ignore this setting.
     pub codex_response_handoff_mode: CodexResponseHandoffMode,
     /// Optional client-selected BEM prefixes keyed by `analysis`, `commentary`, and `final`.
@@ -237,13 +237,13 @@ pub struct ConversationStartParams {
     pub model: Option<String>,
     /// Selects whether the realtime session should produce text or audio output.
     pub output_modality: RealtimeOutputModality,
-    /// Whether to append Codex's startup context to the realtime backend prompt.
+    /// Whether to append localcode's startup context to the realtime backend prompt.
     pub include_startup_context: bool,
     /// Complete role-bearing text items to include in the initial realtime session history.
     pub initial_items: Vec<ConversationTextParams>,
-    /// Developer instructions given to Codex when this realtime session starts.
+    /// Developer instructions given to localcode when this realtime session starts.
     pub realtime_start_instructions: Option<String>,
-    /// Developer instructions given to Codex when this realtime session ends.
+    /// Developer instructions given to localcode when this realtime session ends.
     pub realtime_end_instructions: Option<String>,
     pub prompt: Option<Option<String>>,
     pub realtime_session_id: Option<String>,
@@ -735,7 +735,7 @@ pub enum Op {
     /// model.
     SetThreadMemoryMode { mode: ThreadMemoryMode },
 
-    /// Request Codex to drop the last N user turns from in-memory context.
+    /// Request localcode to drop the last N user turns from in-memory context.
     ///
     /// This does not attempt to revert local filesystem changes. Clients are
     /// responsible for undoing any edits on disk.
@@ -964,7 +964,7 @@ impl Op {
 }
 
 /// Determines the conditions under which the user is consulted to approve
-/// running the command proposed by Codex.
+/// running the command proposed by localcode.
 #[derive(
     Debug,
     Clone,
@@ -1844,7 +1844,7 @@ pub enum NonSteerableTurnKind {
     Compact,
 }
 
-/// Codex errors that we expose to clients.
+/// localcode errors that we expose to clients.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema, TS)]
 #[serde(rename_all = "snake_case")]
 #[ts(rename_all = "snake_case")]

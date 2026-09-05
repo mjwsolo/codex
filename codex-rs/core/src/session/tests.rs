@@ -1816,7 +1816,7 @@ async fn reload_user_config_layer_refreshes_hooks() -> anyhow::Result<()> {
         config
             .features
             .enable(Feature::CodexHooks)
-            .expect("enable Codex hooks");
+            .expect("enable localcode hooks");
     })
     .await?;
     let codex_home = session.codex_home().await;
@@ -1894,7 +1894,7 @@ async fn refresh_runtime_config_refreshes_hooks() -> anyhow::Result<()> {
         config
             .features
             .enable(Feature::CodexHooks)
-            .expect("enable Codex hooks");
+            .expect("enable localcode hooks");
         state.session_configuration.original_config_do_not_use = Arc::new(config);
     }
     let codex_home = session.codex_home().await;

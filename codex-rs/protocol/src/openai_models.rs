@@ -221,7 +221,7 @@ pub struct ModelServiceTier {
     pub description: String,
 }
 
-/// Metadata describing a Codex-supported model.
+/// Metadata describing a localcode-supported model.
 #[derive(Debug, Clone, Deserialize, Serialize, TS, JsonSchema, PartialEq)]
 pub struct ModelPreset {
     /// Stable identifier for the preset.
@@ -387,7 +387,7 @@ const fn is_true(value: &bool) -> bool {
     *value
 }
 
-/// Model metadata returned by the Codex backend `/models` endpoint.
+/// Model metadata returned by the localcode backend `/models` endpoint.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, TS, JsonSchema)]
 pub struct ModelInfo {
     pub slug: String,

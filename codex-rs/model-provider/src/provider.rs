@@ -50,7 +50,7 @@ pub enum RemoteCompactionSupport {
     V2,
 }
 
-/// Optional provider-backed features that Codex may expose at runtime.
+/// Optional provider-backed features that localcode may expose at runtime.
 ///
 /// These capabilities are a provider-owned upper bound. Callers can disable
 /// more functionality through normal config, but should not expose a feature
@@ -184,7 +184,7 @@ pub trait ModelProvider: fmt::Debug + Send + Sync {
     ///
     /// TODO(celia-oai): Make auth manager access internal to this crate so callers
     /// resolve provider-specific auth only through `ModelProvider`. We first need
-    /// to think through whether Codex should have a unified provider-specific auth
+    /// to think through whether localcode should have a unified provider-specific auth
     /// manager throughout the codebase; that is a larger refactor than this change.
     fn auth_manager(&self) -> Option<Arc<AuthManager>>;
 
@@ -251,7 +251,7 @@ pub trait ModelProvider: fmt::Debug + Send + Sync {
         })
     }
 
-    /// Returns request credentials, optionally scoped to a Codex session task.
+    /// Returns request credentials, optionally scoped to a localcode session task.
     fn api_auth_for_scope(
         &self,
         scope: ProviderAuthScope,

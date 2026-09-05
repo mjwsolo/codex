@@ -333,7 +333,7 @@ fn handle_request(
         }
         crate::service::log_error(
             crate::service::EVENT_REQUEST_REJECTED,
-            &format!("Codex sandbox provisioning was rejected by administrator policy: {error}"),
+            &format!("localcode sandbox provisioning was rejected by administrator policy: {error}"),
         );
         return Err(error)
             .context("requested sandbox settings violate administrator-controlled machine policy");
@@ -386,14 +386,14 @@ fn handle_request(
             crate::service::record_provisioned_user(&installation)?;
             crate::service::log_information(
                 crate::service::EVENT_PROVISIONING_SUCCEEDED,
-                "Codex sandbox provisioning completed successfully.",
+                "localcode sandbox provisioning completed successfully.",
             );
             Ok(SandboxProvisioningResponse::Ok)
         }
         Err(error) => {
             crate::service::log_error(
                 crate::service::EVENT_PROVISIONING_FAILED,
-                &format!("Codex sandbox provisioning failed: {error}"),
+                &format!("localcode sandbox provisioning failed: {error}"),
             );
             Err(error).context("sandbox provisioning failed")
         }

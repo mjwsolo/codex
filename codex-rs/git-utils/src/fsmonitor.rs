@@ -42,7 +42,7 @@ pub trait FsmonitorProbeRunner: Send {
 /// Returns the safe filesystem monitor override for the target repository.
 ///
 /// This intentionally probes every time. Effective Git configuration is
-/// layered, may use conditional includes, and can change while Codex is
+/// layered, may use conditional includes, and can change while localcode is
 /// running:
 /// https://git-scm.com/docs/git-config#SCOPES
 /// https://git-scm.com/docs/git-config#_conditional_includes

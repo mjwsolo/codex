@@ -79,7 +79,7 @@ pub struct McpResourceOrigin {
 /// Client extensions that must not be advertised to MCP servers.
 const MCP_CLIENT_ONLY_EXTENSION_IDS: [&str; 1] = [OPENAI_STANDARD_FORM_INPUT_EXTENSION_ID];
 
-/// MCP extensions supplied by the client that created a Codex session.
+/// MCP extensions supplied by the client that created a localcode session.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct ClientMcpExtensions {
     extensions: HashMap<String, serde_json::Value>,

@@ -27,7 +27,7 @@ pub(super) struct UnsupportedHomeDrive;
 
 impl std::fmt::Display for UnsupportedHomeDrive {
     fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        formatter.write_str("Codex home must be located on a fixed local drive")
+        formatter.write_str("localcode home must be located on a fixed local drive")
     }
 }
 
@@ -49,7 +49,7 @@ pub(super) fn prepare_codex_home(requested: &Path) -> Result<(PathBuf, Vec<Owned
     let requested_root = requested
         .ancestors()
         .last()
-        .context("find the root of the requested Codex home")?;
+        .context("find the root of the requested localcode home")?;
     if unsafe { filesystem::GetDriveTypeW(to_wide(requested_root.as_os_str()).as_ptr()) }
         != DRIVE_FIXED
     {
@@ -57,7 +57,7 @@ pub(super) fn prepare_codex_home(requested: &Path) -> Result<(PathBuf, Vec<Owned
     }
     let parent = requested
         .parent()
-        .context("Codex home must have an existing parent directory")?;
+        .context("localcode home must have an existing parent directory")?;
     pin_existing_ancestors(parent, &mut handles)?;
     handles.push(pin_directory(
         requested,
@@ -66,12 +66,12 @@ pub(super) fn prepare_codex_home(requested: &Path) -> Result<(PathBuf, Vec<Owned
     )?);
     let home = requested
         .canonicalize()
-        .with_context(|| format!("canonicalize Codex home {}", requested.display()))?;
+        .with_context(|| format!("canonicalize localcode home {}", requested.display()))?;
     validate_local_directory_path(&home)?;
     let root = home
         .ancestors()
         .last()
-        .context("find the root of the requested Codex home")?;
+        .context("find the root of the requested localcode home")?;
     if unsafe { filesystem::GetDriveTypeW(to_wide(root.as_os_str()).as_ptr()) } != DRIVE_FIXED {
         return Err(UnsupportedHomeDrive.into());
     }
@@ -97,7 +97,7 @@ pub(super) fn prepare_codex_home(requested: &Path) -> Result<(PathBuf, Vec<Owned
             .with_context(|| {
             if index == 0 {
                 format!(
-                    "requesting user must be permitted to write Codex home {}",
+                    "requesting user must be permitted to write localcode home {}",
                     directory.display()
                 )
             } else {

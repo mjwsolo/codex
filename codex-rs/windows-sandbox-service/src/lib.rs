@@ -33,6 +33,6 @@ pub fn run(mode: RunMode) -> Result<()> {
     #[cfg(not(windows))]
     {
         let _ = mode;
-        anyhow::bail!("the Codex sandbox service is only available on Windows")
+        anyhow::bail!("the localcode sandbox service is only available on Windows")
     }
 }

@@ -340,7 +340,7 @@ enum ThreadListRepairMode {
 }
 
 impl RolloutRecorder {
-    /// List threads (rollout files) under the provided Codex home directory.
+    /// List threads (rollout files) under the provided localcode home directory.
     #[allow(clippy::too_many_arguments)]
     pub async fn list_threads(
         state_db_ctx: Option<StateDbHandle>,

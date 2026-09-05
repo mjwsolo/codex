@@ -202,7 +202,7 @@ pub struct ThreadSectionAppearance {
 #[serde(rename_all = "camelCase")]
 #[ts(export_to = "v2/")]
 pub struct Thread {
-    /// Identifier for this thread. Codex-generated thread IDs are UUIDv7.
+    /// Identifier for this thread. localcode-generated thread IDs are UUIDv7.
     pub id: String,
     /// Current environments for a loaded thread, in priority order, primary first.
     /// `null` means the thread is not loaded or the server does not expose its selection.
@@ -267,7 +267,7 @@ pub struct Thread {
     /// Originator recorded when the thread was created, independent of its current client or executor.
     /// Null when the recorded originator is unavailable.
     pub originator: Option<String>,
-    /// Origin of the thread (CLI, VSCode, codex exec, codex app-server, etc.).
+    /// Origin of the thread (CLI, VSCode, localcode exec, localcode app-server, etc.).
     pub source: SessionSource,
     /// Whether the app server accepts direct turn input for this loaded thread.
     /// `None` means the capability is unavailable, such as for an unloaded stored thread.
@@ -379,7 +379,7 @@ impl<'de> Deserialize<'de> for Thread {
 #[serde(rename_all = "camelCase")]
 #[ts(export_to = "v2/")]
 pub struct Turn {
-    /// Identifier for this turn. Codex-generated turn IDs are UUIDv7.
+    /// Identifier for this turn. localcode-generated turn IDs are UUIDv7.
     pub id: String,
     /// Thread items currently included in this turn payload.
     pub items: Vec<ThreadItem>,

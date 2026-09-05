@@ -386,6 +386,11 @@ mod plan_implementation;
 use self::plan_implementation::PLAN_IMPLEMENTATION_TITLE;
 mod model_popup_state;
 mod model_popups;
+mod localcode_picker;
+pub(crate) use localcode_picker::LocalcodeCatalog;
+pub(crate) use localcode_picker::LocalcodeQuants;
+pub(crate) use localcode_picker::LocalcodeStatus;
+pub(crate) use localcode_picker::localcode_control_url;
 mod notifications;
 use self::notifications::Notification;
 mod permission_discovery;
@@ -581,6 +586,8 @@ pub(crate) struct ChatWidget {
     permission_popup_request_id: Option<uuid::Uuid>,
     permission_profiles_menu_opened: bool,
     model_popup_model_ids: Vec<String>,
+    /// Alias of the model localcode is switching to, while a switch runs.
+    localcode_switch: Option<String>,
     session_telemetry: SessionTelemetry,
     session_header: SessionHeader,
     initial_user_message: Option<UserMessage>,

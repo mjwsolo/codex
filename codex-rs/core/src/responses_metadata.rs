@@ -209,9 +209,9 @@ pub(crate) enum TurnToolSource {
     Mcp { server_name: String },
 }
 
-/// Caller-owned snapshot of Codex metadata sent to ResponsesAPI.
+/// Caller-owned snapshot of localcode metadata sent to ResponsesAPI.
 ///
-/// The full Codex turn metadata blob is transported canonically as
+/// The full localcode turn metadata blob is transported canonically as
 /// `client_metadata["x-codex-turn-metadata"]`. Flat `client_metadata` keys and direct HTTP/ws
 /// headers are generated compatibility projections of this snapshot, not separate sources of
 /// truth.

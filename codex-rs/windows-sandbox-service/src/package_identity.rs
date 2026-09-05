@@ -78,14 +78,14 @@ pub(crate) fn authorize_client_process(pipe: HANDLE) -> Result<AuthorizedClientP
                 && is_known_codex_package_family(&client_family) => {}
             #[cfg(debug_assertions)]
             None if FOREGROUND_MODE.load(Ordering::Acquire) => {
-                bail!("provisioning client does not belong to a trusted Codex package family")
+                bail!("provisioning client does not belong to a trusted localcode package family")
             }
             None => bail!("provisioning service has no package identity"),
         },
         None if service_family.is_some() => {}
         #[cfg(debug_assertions)]
         None if FOREGROUND_MODE.load(Ordering::Acquire) => {}
-        None => bail!("provisioning clients must run with an installed Codex package identity"),
+        None => bail!("provisioning clients must run with an installed localcode package identity"),
     }
 
     Ok(AuthorizedClientProcess { handle: process })

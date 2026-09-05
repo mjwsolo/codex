@@ -149,7 +149,7 @@ const REMOTE_TERMINAL_ENV_VARS: &[&str] = &[
 const NARROW_TERMINAL_COLUMNS: u16 = 80;
 const NARROW_TERMINAL_ROWS: u16 = 24;
 
-/// Options for building a local Codex diagnostic report.
+/// Options for building a local localcode diagnostic report.
 ///
 /// The command always runs the full diagnostic set. Human output includes
 /// detailed diagnostics by default; --summary keeps the terminal output compact.
@@ -586,7 +586,7 @@ async fn load_config(
         .harness_overrides(overrides)
         .build()
         .await
-        .context("failed to load Codex config")
+        .context("failed to load localcode config")
 }
 
 fn config_overrides_from_interactive(
@@ -621,7 +621,7 @@ fn config_overrides_from_interactive(
     }
 }
 
-/// JSON support report emitted by `codex doctor --json`.
+/// JSON support report emitted by `localcode doctor --json`.
 ///
 /// The report is keyed by check id so support tooling can fetch paths like
 /// `checks["terminal.metadata"]` without scanning arrays. Human rendering can
@@ -904,7 +904,7 @@ fn installation_check(show_details: bool) -> DoctorCheck {
             status = status.max(CheckStatus::Warning);
             summary = "npm-managed launch is missing package-root provenance".to_string();
             remediation = Some(
-                "Reinstall or update Codex so the JS shim provides CODEX_MANAGED_PACKAGE_ROOT."
+                "Reinstall or update localcode so the JS shim provides CODEX_MANAGED_PACKAGE_ROOT."
                     .to_string(),
             );
         }
@@ -1220,7 +1220,7 @@ fn auth_check(config: &Config) -> DoctorCheck {
                 DoctorCheck::new("auth.credentials", "auth", status, summary).details(details);
             if status == CheckStatus::Fail {
                 check =
-                    check.remediation("Run codex login again or provide a supported auth env var.");
+                    check.remediation("Run localcode login again or provide a supported auth env var.");
             }
             check
         }
@@ -1235,10 +1235,10 @@ fn auth_check(config: &Config) -> DoctorCheck {
             "auth.credentials",
             "auth",
             CheckStatus::Fail,
-            "no Codex credentials were found",
+            "no localcode credentials were found",
         )
         .details(details)
-        .remediation("Run codex login or provide an API key through a supported auth env var."),
+        .remediation("Run localcode login or provide an API key through a supported auth env var."),
         Err(err) => DoctorCheck::new(
             "auth.credentials",
             "auth",
@@ -1246,7 +1246,7 @@ fn auth_check(config: &Config) -> DoctorCheck {
             "stored credentials could not be read",
         )
         .detail(err.to_string())
-        .remediation("Fix auth storage access or run codex login again."),
+        .remediation("Fix auth storage access or run localcode login again."),
     }
 }
 
@@ -3395,7 +3395,7 @@ mod tests {
         let check = provider_specific_auth_check(
             /*requires_openai_auth*/ false,
             Some("PROVIDER_API_KEY"),
-            Some("Set PROVIDER_API_KEY before running Codex."),
+            Some("Set PROVIDER_API_KEY before running localcode."),
             Vec::new(),
             |_| false,
         )
@@ -3408,7 +3408,7 @@ mod tests {
         );
         assert_eq!(
             check.remediation,
-            Some("Set PROVIDER_API_KEY before running Codex.".to_string())
+            Some("Set PROVIDER_API_KEY before running localcode.".to_string())
         );
     }
 

@@ -22,6 +22,13 @@ impl ChatWidget {
             return;
         }
 
+        // localcode front end: model first, then quant, from localcode's own
+        // catalog — never the bundled GPT presets.
+        if let Some(base) = localcode_picker::localcode_control_url() {
+            self.open_localcode_model_popup(base);
+            return;
+        }
+
         let presets: Vec<ModelPreset> = match self.model_catalog.try_list_models() {
             Ok(models) => models,
             Err(_) => {
@@ -254,7 +261,7 @@ impl ChatWidget {
 
         let header = self.model_menu_header(
             "Select Model and Effort",
-            "Access legacy models by running codex -m <model_name> or in your config.toml",
+            "Access legacy models by running localcode -m <model_name> or in your config.toml",
         );
         self.show_model_selection_view(SelectionViewParams {
             view_id: Some(view_id),

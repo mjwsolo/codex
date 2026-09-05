@@ -17,7 +17,7 @@ const KEEP_COUNT: &str = "worktree-keep-count";
 
 pub const DEFAULT_WORKTREE_KEEP_COUNT: usize = 15;
 
-/// Effective host-local settings already understood by Codex Desktop.
+/// Effective host-local settings already understood by localcode Desktop.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct WorktreeSettings {
     pub root: PathBuf,

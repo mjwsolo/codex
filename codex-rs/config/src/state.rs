@@ -41,7 +41,7 @@ impl From<LoaderOverrides> for ConfigLoadOptions {
 /// LoaderOverrides overrides managed configuration inputs (primarily for tests).
 #[derive(Debug, Default, Clone)]
 pub struct LoaderOverrides {
-    /// Optional configuration file supplied with the installed Codex package.
+    /// Optional configuration file supplied with the installed localcode package.
     pub packaged_defaults_path: Option<AbsolutePathBuf>,
     pub user_config_path: Option<AbsolutePathBuf>,
     pub user_config_profile: Option<ProfileV2Name>,

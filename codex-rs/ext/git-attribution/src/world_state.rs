@@ -71,8 +71,8 @@ fn is_legacy_commit_attribution_fragment(role: &str, text: &str) -> bool {
 fn is_enabled_fragment(role: &str, text: &str) -> bool {
     role == "developer"
         && text.trim_start().starts_with(START_MARKER)
-        && text.contains("Co-authored-by: Codex <noreply@openai.com>")
-        && (text.contains("Generated with [Codex](https://openai.com/codex/).")
-            || text.contains("Generated with Codex."))
+        && text.contains("Co-authored-by: localcode <noreply@openai.com>")
+        && (text.contains("Generated with [localcode](https://openai.com/codex/).")
+            || text.contains("Generated with localcode."))
         && text.trim_end().ends_with(END_MARKER)
 }

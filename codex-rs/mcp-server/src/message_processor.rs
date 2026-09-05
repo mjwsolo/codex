@@ -251,7 +251,7 @@ impl MessageProcessor {
         }
 
         let server_info =
-            Implementation::new("codex-mcp-server", env!("CARGO_PKG_VERSION")).with_title("Codex");
+            Implementation::new("codex-mcp-server", env!("CARGO_PKG_VERSION")).with_title("localcode");
 
         // Preserve Codex's existing non-spec `serverInfo.user_agent` field.
         let mut server_info_value = match serde_json::to_value(&server_info) {
@@ -380,7 +380,7 @@ impl MessageProcessor {
                     Ok(cfg) => cfg,
                     Err(e) => {
                         let result = CallToolResult::error(vec![rmcp::model::ContentBlock::text(
-                            format!("Failed to load Codex configuration from overrides: {e}"),
+                            format!("Failed to load localcode configuration from overrides: {e}"),
                         )]);
                         self.outgoing.send_response(id, result);
                         return;
@@ -388,7 +388,7 @@ impl MessageProcessor {
                 },
                 Err(e) => {
                     let result = CallToolResult::error(vec![rmcp::model::ContentBlock::text(
-                        format!("Failed to parse configuration for Codex tool: {e}"),
+                        format!("Failed to parse configuration for localcode tool: {e}"),
                     )]);
                     self.outgoing.send_response(id, result);
                     return;
@@ -437,9 +437,9 @@ impl MessageProcessor {
             Some(json_val) => match serde_json::from_value::<CodexToolCallReplyParam>(json_val) {
                 Ok(params) => params,
                 Err(e) => {
-                    tracing::error!("Failed to parse Codex tool call reply parameters: {e}");
+                    tracing::error!("Failed to parse localcode tool call reply parameters: {e}");
                     let result = CallToolResult::error(vec![rmcp::model::ContentBlock::text(
-                        format!("Failed to parse configuration for Codex tool: {e}"),
+                        format!("Failed to parse configuration for localcode tool: {e}"),
                     )]);
                     self.outgoing.send_response(request_id, result);
                     return;
@@ -563,7 +563,7 @@ impl MessageProcessor {
             .submit(codex_protocol::protocol::Op::Interrupt)
             .await
         {
-            tracing::error!("Failed to submit interrupt to Codex: {e}");
+            tracing::error!("Failed to submit interrupt to localcode: {e}");
             return;
         }
         // Stop routing extension events to the cancelled turn.

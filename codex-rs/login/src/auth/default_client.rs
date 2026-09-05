@@ -35,7 +35,7 @@ use crate::outbound_proxy::AuthRouteConfig;
 ///
 /// A space is automatically added between the suffix and the rest of the User-Agent string.
 /// The full user agent string is returned from the mcp initialize response.
-/// Parenthesis will be added by Codex. This should only specify what goes inside of the parenthesis.
+/// Parenthesis will be added by localcode. This should only specify what goes inside of the parenthesis.
 pub static USER_AGENT_SUFFIX: LazyLock<Mutex<Option<String>>> = LazyLock::new(|| Mutex::new(None));
 pub const DEFAULT_ORIGINATOR: &str = "codex_cli_rs";
 pub const CODEX_INTERNAL_ORIGINATOR_OVERRIDE_ENV_VAR: &str = "CODEX_INTERNAL_ORIGINATOR_OVERRIDE";
@@ -154,7 +154,7 @@ pub fn is_first_party_originator(originator_value: &str) -> bool {
     originator_value == DEFAULT_ORIGINATOR
         || originator_value == "codex-tui"
         || originator_value == "codex_vscode"
-        || originator_value.starts_with("Codex ")
+        || originator_value.starts_with("localcode ")
 }
 
 pub fn is_first_party_chat_originator(originator_value: &str) -> bool {
@@ -203,17 +203,17 @@ fn sanitize_user_agent(candidate: String, fallback: &str) -> String {
         .collect();
     if !sanitized.is_empty() && HeaderValue::from_str(sanitized.as_str()).is_ok() {
         tracing::warn!(
-            "Sanitized Codex user agent because provided suffix contained invalid header characters"
+            "Sanitized localcode user agent because provided suffix contained invalid header characters"
         );
         sanitized
     } else if HeaderValue::from_str(fallback).is_ok() {
         tracing::warn!(
-            "Falling back to base Codex user agent because provided suffix could not be sanitized"
+            "Falling back to base localcode user agent because provided suffix could not be sanitized"
         );
         fallback.to_string()
     } else {
         tracing::warn!(
-            "Falling back to default Codex originator because base user agent string is invalid"
+            "Falling back to default localcode originator because base user agent string is invalid"
         );
         originator().value
     }
@@ -222,7 +222,7 @@ fn sanitize_user_agent(candidate: String, fallback: &str) -> String {
 /// Create an HTTP client with default `originator` and `User-Agent` headers set.
 ///
 /// This supported default path preserves the transport's existing proxy behavior and does not opt into
-/// Codex's route-aware system/PAC resolution.
+/// localcode's route-aware system/PAC resolution.
 pub fn create_client() -> HttpClient {
     build_default_client(default_http_client_builder())
 }
@@ -244,9 +244,9 @@ pub fn create_client_without_request_logging() -> HttpClient {
     build_default_client(default_http_client_builder().without_request_logging())
 }
 
-/// Builds the default Codex HTTP client for a concrete outbound route.
+/// Builds the default localcode HTTP client for a concrete outbound route.
 ///
-/// When route-aware proxy handling is disabled, or the client is running inside the Codex
+/// When route-aware proxy handling is disabled, or the client is running inside the localcode
 /// sandbox, this preserves the default client's existing proxy behavior. Otherwise it resolves
 /// the destination through the shared system/PAC-aware routing policy.
 pub fn create_client_for_route(
@@ -273,7 +273,7 @@ pub fn create_client_for_route(
     )
 }
 
-/// Builds the default Codex HTTP client for a concrete outbound route without blocking the
+/// Builds the default localcode HTTP client for a concrete outbound route without blocking the
 /// async runtime worker that initiated the request.
 pub async fn create_client_for_route_async(
     http_client_factory: HttpClientFactory,
@@ -310,7 +310,7 @@ fn build_default_client(builder: HttpClientBuilder) -> HttpClient {
     }
 }
 
-/// Builds an HTTP client for an auth endpoint without Codex default headers.
+/// Builds an HTTP client for an auth endpoint without localcode default headers.
 pub(crate) fn create_raw_auth_client(
     endpoint: &str,
     auth_route_config: &AuthRouteConfig,
@@ -320,7 +320,7 @@ pub(crate) fn create_raw_auth_client(
         .build_client_without_request_logging(endpoint, ClientRouteClass::Auth)
 }
 
-/// Builds the default Codex HTTP client wrapper for an auth endpoint.
+/// Builds the default localcode HTTP client wrapper for an auth endpoint.
 pub(crate) fn create_default_auth_client(
     endpoint: &str,
     auth_route_config: &AuthRouteConfig,

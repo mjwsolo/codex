@@ -1060,6 +1060,26 @@ pub(crate) enum AppEvent {
 
     /// Open the full model picker (non-auto models).
     OpenAllModelsPopup,
+    /// localcode picker: level-1 catalog arrived from the supervisor.
+    LocalcodeCatalogLoaded {
+        result: Result<crate::chatwidget::LocalcodeCatalog, String>,
+    },
+    /// localcode picker: open level 2 (quants) for a catalog group.
+    LocalcodeOpenQuants { group: String },
+    LocalcodeQuantsLoaded {
+        result: Result<crate::chatwidget::LocalcodeQuants, String>,
+    },
+    /// localcode picker: download if needed, then switch the server to this quant.
+    LocalcodeSelectQuant {
+        group: String,
+        filename: String,
+        alias: String,
+        display: String,
+    },
+    /// localcode picker: progress of an in-flight switch.
+    LocalcodeSwitchStatus {
+        result: Result<crate::chatwidget::LocalcodeStatus, String>,
+    },
 
     /// Open the confirmation prompt before enabling full access mode.
     OpenFullAccessConfirmation {

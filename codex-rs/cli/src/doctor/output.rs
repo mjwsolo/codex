@@ -79,7 +79,7 @@ pub(super) fn render_human_report(report: &DoctorReport, options: HumanOutputOpt
     let _ = writeln!(
         out,
         "{} {}",
-        bold("Codex Doctor", options),
+        bold("localcode Doctor", options),
         dim(&header_suffix(report), options)
     );
     out.push('\n');
@@ -1210,7 +1210,7 @@ mod tests {
                 "token expired",
             )
             .detail("OPENAI_API_KEY: present")
-            .remediation("Run `codex login`."),
+            .remediation("Run `localcode login`."),
             DoctorCheck::new(
                 "updates.status",
                 "updates",
@@ -1342,7 +1342,7 @@ Background Server
             .iter_mut()
             .find(|detail| detail.starts_with("exclusion targets: "))
             .expect("endpoint security check should include exclusion targets");
-        *targets = "exclusion targets: verified Codex app and required helpers".into();
+        *targets = "exclusion targets: verified localcode app and required helpers".into();
         report.checks.push(security);
         report.checks.extend([
             DoctorCheck::new(

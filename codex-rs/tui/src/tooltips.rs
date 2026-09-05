@@ -9,13 +9,13 @@ const ANNOUNCEMENT_TIP_URL: &str =
 const IS_MACOS: bool = cfg!(target_os = "macos");
 const IS_WINDOWS: bool = cfg!(target_os = "windows");
 
-const APP_TOOLTIP: &str = "Try the **Desktop app**. Run 'codex app' or visit https://chatgpt.com/codex?app-landing-page=true";
+const APP_TOOLTIP: &str = "Run `/model` to switch models: pick the model first, then the quant that fits your Mac.";
 const MACOS_APP_TOOLTIP: &str =
-    "Run `codex app` to open the Desktop app (it installs on macOS if needed).";
-const LINUX_APP_TOOLTIP: &str = "Try the **Desktop app** on Linux: install it from https://learn.chatgpt.com/docs/linux/linux-app and run 'chatgpt'.";
+    "Everything runs on this Mac. No prompts or files leave the machine.";
+const LINUX_APP_TOOLTIP: &str = "Everything runs on this machine. No prompts or files leave it.";
 const FAST_TOOLTIP: &str =
     "*New* Use **/fast** to enable our fastest inference with increased plan usage.";
-const OTHER_TOOLTIP: &str = "*New* Build faster with the **Desktop app**. Run 'codex app' or visit https://chatgpt.com/codex?app-landing-page=true";
+const OTHER_TOOLTIP: &str = "Run `/model` to switch models: pick the model first, then the quant that fits.";
 const OTHER_TOOLTIP_NON_MAC: &str = "*New* Build faster with localcode.";
 const FREE_GO_TOOLTIP: &str =
     "*New* For a limited time, localcode is included in your plan for free – let’s build together.";
@@ -238,6 +238,12 @@ pub(crate) mod announcement {
     }
 
     async fn fetch_announcement_tip_text(http_client_factory: HttpClientFactory) -> Option<String> {
+        // localcode: nothing phones home. No startup fetch of upstream's
+        // announcement feed; the TUI simply shows no announcement tip.
+        if true {
+            let _ = &http_client_factory;
+            return None;
+        }
         let client = RouteAwareClientPool::new(http_client_factory, ClientRouteClass::Other);
         let response = client
             .get(ANNOUNCEMENT_TIP_URL)
@@ -387,7 +393,7 @@ mod tests {
             assert_eq!(paid_app_tooltip(), Some(tooltip));
         } else if IS_MACOS {
             let tooltip = tooltip.expect("macOS should advertise the desktop app");
-            insta::assert_snapshot!(tooltip, @"Run `codex app` to open the Desktop app (it installs on macOS if needed).");
+            insta::assert_snapshot!(tooltip, @"Run `localcode app` to open the Desktop app (it installs on macOS if needed).");
             assert_eq!(paid_app_tooltip(), Some(APP_TOOLTIP));
         } else if IS_WINDOWS {
             assert_eq!(tooltip, None);

@@ -26,11 +26,11 @@ const LOCK_FILENAME: &str = ".lock";
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Arg0DispatchPaths {
-    /// Stable path to the current Codex executable for child re-execs.
+    /// Stable path to the current localcode executable for child re-execs.
     ///
     /// Prefer this over [`std::env::current_exe()`] in code that may run under
     /// a test harness, where `current_exe()` can point at the harness binary
-    /// instead of the real Codex CLI.
+    /// instead of the real localcode.
     pub codex_self_exe: Option<PathBuf>,
     pub codex_linux_sandbox_exe: Option<PathBuf>,
     pub main_execve_wrapper_exe: Option<PathBuf>,
@@ -192,7 +192,7 @@ fn prepare_path_env_var_with_aliases(
     }
 }
 
-/// While we want to deploy the Codex CLI as a single executable for simplicity,
+/// While we want to deploy localcode as a single executable for simplicity,
 /// we also want to expose some of its functionality as distinct CLIs, so we use
 /// the "arg0 trick" to determine which CLI to dispatch. This effectively allows
 /// us to simulate deploying multiple executables as a single binary on Mac and
@@ -330,7 +330,7 @@ where
 ///
 /// Returns the temporary directory guard and the PATH value that prepends the
 /// temporary directory so `apply_patch` can be on the PATH without requiring the
-/// user to install a separate executable, simplifying the deployment of Codex
+/// user to install a separate executable, simplifying the deployment of localcode
 /// CLI.
 /// Note: In debug builds the temp-dir guard is disabled to ease local testing.
 ///

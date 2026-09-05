@@ -42,7 +42,7 @@ pub struct ResponseItemEnvelope {
     pub metadata: Option<CodexHarnessMetadata>,
 }
 
-/// Metadata owned by the Codex harness and persisted with a response item.
+/// Metadata owned by the localcode harness and persisted with a response item.
 ///
 #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq, Eq, JsonSchema)]
 pub struct CodexHarnessMetadata {
@@ -55,7 +55,7 @@ pub struct CodexHarnessMetadata {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub fallback_token_limit_override: Option<usize>,
 
-    /// Whether a response configuration update was created by the Codex harness itself.
+    /// Whether a response configuration update was created by the localcode harness itself.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub harness_authored_configuration: bool,
 

@@ -20,7 +20,7 @@ use windows_sys::Win32::System::Registry as registry;
 use windows_sys::Win32::UI::Shell::GetUserProfileDirectoryW;
 
 // Package updates can replace the service key, so keep this record outside it.
-const INSTALLATION_KEY: &str = r"SOFTWARE\OpenAI\Codex\WindowsSandboxService";
+const INSTALLATION_KEY: &str = r"SOFTWARE\OpenAI\localcode\WindowsSandboxService";
 const INSTALLATION_VALUE: &str = "ProvisionedInstallation";
 const MAX_VALUE_UNITS: usize = 4096;
 const DESKTOP_INSTALLATION_MARKER: &str = ".desktop-created";

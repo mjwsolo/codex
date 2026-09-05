@@ -25,6 +25,11 @@ use crate::version::CODEX_CLI_VERSION;
 pub(crate) use crate::updates_cache::dismiss_version;
 
 pub fn get_upgrade_version(config: &Config) -> Option<String> {
+    // localcode: nothing phones home. No GitHub/Homebrew version checks.
+    if std::env::var_os("LOCALCODE_ALLOW_UPDATE_CHECK").is_none() {
+        let _ = config;
+        return None;
+    }
     if !config.check_for_update_on_startup || is_source_build_version(CODEX_CLI_VERSION) {
         return None;
     }

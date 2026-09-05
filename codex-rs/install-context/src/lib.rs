@@ -31,7 +31,7 @@ pub enum StandalonePlatform {
 pub struct CodexPackageLayout {
     /// The package root that contains the metadata file and layout directories.
     pub package_dir: AbsolutePathBuf,
-    /// Directory containing the Codex entrypoint executable.
+    /// Directory containing the localcode entrypoint executable.
     pub bin_dir: AbsolutePathBuf,
     /// Directory containing managed helper binaries and data files, when present.
     pub resources_dir: Option<AbsolutePathBuf>,
@@ -39,7 +39,7 @@ pub struct CodexPackageLayout {
     pub path_dir: Option<AbsolutePathBuf>,
 }
 
-/// Version metadata recorded in a bundled Codex runtime package.
+/// Version metadata recorded in a bundled localcode runtime package.
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq)]
 pub struct CodexPackageManifest {
     pub version: Version,
@@ -65,20 +65,20 @@ pub enum InstallMethod {
         /// The platform of the standalone release, either `Unix` or `Windows`.
         platform: StandalonePlatform,
     },
-    /// A Codex binary launched through the npm-managed `codex.js` shim.
+    /// A localcode binary launched through the npm-managed `codex.js` shim.
     Npm,
-    /// A Codex binary launched through the bun-managed `codex.js` shim.
+    /// A localcode binary launched through the bun-managed `codex.js` shim.
     Bun,
-    /// A Codex binary launched through the pnpm-managed `codex.js` shim.
+    /// A localcode binary launched through the pnpm-managed `codex.js` shim.
     Pnpm,
-    /// A Codex binary launched through the Vite+-managed `codex.js` shim.
+    /// A localcode binary launched through the Vite+-managed `codex.js` shim.
     VitePlus,
-    /// A Codex binary that appears to come from a Homebrew install prefix.
+    /// A localcode binary that appears to come from a Homebrew install prefix.
     Brew,
     /// Any other execution environment.
     ///
-    /// This commonly covers `cargo run`, app-bundled Codex binaries, custom
-    /// internal launchers, and tests that execute Codex from an arbitrary path.
+    /// This commonly covers `cargo run`, app-bundled localcode binaries, custom
+    /// internal launchers, and tests that execute localcode from an arbitrary path.
     Other,
 }
 

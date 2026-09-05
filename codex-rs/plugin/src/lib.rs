@@ -89,7 +89,7 @@ pub struct ExecutorPluginHookSource {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PluginTelemetryMetadata {
-    /// Local plugin identifier used by Codex configuration and the plugin cache,
+    /// Local plugin identifier used by localcode configuration and the plugin cache,
     /// when it has been resolved.
     pub plugin_id: Option<PluginId>,
     /// Optional backend identifier for remote plugins.

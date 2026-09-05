@@ -42,9 +42,9 @@ pub enum ToolCallOutcome {
 /// Provenance captured from the immutable MCP call selected for one tool invocation.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum McpToolSource {
-    /// A connector routed through the host-owned Codex Apps MCP server.
+    /// A connector routed through the host-owned localcode Apps MCP server.
     Connector,
-    /// An MCP server whose frozen registration matches the active Codex configuration.
+    /// An MCP server whose frozen registration matches the active localcode configuration.
     Config,
     /// An MCP server registered by a locally loaded plugin.
     Plugin {
