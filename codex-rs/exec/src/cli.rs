@@ -17,7 +17,7 @@ pub struct Cli {
     #[command(subcommand)]
     pub command: Option<Command>,
 
-    /// Error out when config.toml contains fields that are not recognized by this version of Codex.
+    /// Error out when config.toml contains fields that are not recognized by this version of localcode.
     #[arg(long = "strict-config", global = true, default_value_t = false)]
     pub strict_config: bool,
 
@@ -28,7 +28,7 @@ pub struct Cli {
     #[arg(long = "thread-source", value_name = "SOURCE", global = true)]
     pub thread_source: Option<ThreadSource>,
 
-    /// Allow running Codex outside a Git repository.
+    /// Allow running localcode outside a Git repository.
     #[arg(long = "skip-git-repo-check", global = true, default_value_t = false)]
     pub skip_git_repo_check: bool,
 

@@ -931,7 +931,7 @@ async fn run_exec_session(args: ExecRunArgs) -> anyhow::Result<()> {
 
     exec_span.record("thread.id", primary_thread_id_for_span.as_str());
 
-    // Print the effective configuration and initial request so users can see what Codex
+    // Print the effective configuration and initial request so users can see what localcode
     // is using.
     event_processor.print_config_summary(&config, &prompt_summary, &session_configured);
     if !json_mode
@@ -941,7 +941,7 @@ async fn run_exec_session(args: ExecRunArgs) -> anyhow::Result<()> {
         event_processor.process_warning(message);
     }
 
-    info!("Codex initialized with event: {session_configured:?}");
+    info!("localcode initialized with event: {session_configured:?}");
 
     let (interrupt_tx, mut interrupt_rx) = mpsc::unbounded_channel::<()>();
     tokio::spawn(async move {

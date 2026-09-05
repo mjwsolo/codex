@@ -670,7 +670,7 @@ pub(crate) enum AppEvent {
         url: String,
     },
 
-    /// Open the current thread in Codex Desktop.
+    /// Open the current thread in localcode Desktop.
     OpenDesktopThread {
         thread_id: ThreadId,
     },
