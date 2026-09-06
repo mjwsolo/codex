@@ -4501,6 +4501,35 @@ impl Session {
         state.latest_plan = plan;
     }
 
+    /// localcode loop breaker: how many times this exact call has failed this turn.
+    pub(crate) async fn repeat_guard_count(&self, turn_id: &str, sig: &str) -> u32 {
+        let state = self.state.lock().await;
+        if state.repeat_guard_turn != turn_id {
+            return 0;
+        }
+        state.repeat_guard.get(sig).copied().unwrap_or(0)
+    }
+
+    /// Record a failure of this exact call; returns the new count for this turn.
+    pub(crate) async fn repeat_guard_failure(&self, turn_id: &str, sig: &str) -> u32 {
+        let mut state = self.state.lock().await;
+        if state.repeat_guard_turn != turn_id {
+            state.repeat_guard_turn = turn_id.to_string();
+            state.repeat_guard.clear();
+        }
+        let n = state.repeat_guard.entry(sig.to_string()).or_insert(0);
+        *n += 1;
+        *n
+    }
+
+    /// A call that succeeded resets its failure streak.
+    pub(crate) async fn repeat_guard_success(&self, turn_id: &str, sig: &str) {
+        let mut state = self.state.lock().await;
+        if state.repeat_guard_turn == turn_id {
+            state.repeat_guard.remove(sig);
+        }
+    }
+
     pub(crate) async fn latest_plan(&self) -> Vec<codex_protocol::plan_tool::PlanItemArg> {
         self.state.lock().await.latest_plan.clone()
     }

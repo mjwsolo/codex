@@ -139,6 +139,7 @@ use tracing::warn;
 /// localcode open-todo gate bounds (same numbers as localcode agent/loop.py).
 const LOCALCODE_MAX_PLAN_CONTINUATIONS: usize = 15;
 const LOCALCODE_MAX_PLAN_STUCK: usize = 3;
+const LOCALCODE_MAX_BUILD_VERIFY: usize = 3;
 
 const POST_SAMPLING_TOKEN_ESTIMATE_TARGET: &str = "codex_core::post_sampling_token_estimate";
 
@@ -327,6 +328,10 @@ pub(crate) async fn run_turn(
     let mut plan_continue_count: usize = 0;
     let mut plan_stuck_count: usize = 0;
     let mut plan_last_remaining: usize = usize::MAX;
+    // localcode build-verification gate (ported from localcode agent/loop.py): bounded.
+    let mut build_verify_nudges: usize = 0;
+    let mut stub_nudge_done = false;
+    let localcode_turn_started = std::time::SystemTime::now();
     // Although from the perspective of codex.rs, TurnDiffTracker has the lifecycle of a Task which contains
     // many turns, from the perspective of the user, it is a single turn.
     let turn_diff_tracker = Arc::new(tokio::sync::Mutex::new(
@@ -626,6 +631,75 @@ pub(crate) async fn run_turn(
                                 let fragment = codex_protocol::items::HookPromptFragment {
                                     text,
                                     hook_run_id: "localcode-plan-gate".to_string(),
+                                };
+                                if let Some(message) =
+                                    build_hook_prompt_message(std::slice::from_ref(&fragment))
+                                {
+                                    sess.record_response_item_and_emit_turn_item(&turn_context, message)
+                                        .await;
+                                    sess.input_queue
+                                        .accept_mailbox_delivery_for_current_turn(
+                                            &sess.active_turn,
+                                            &turn_context.sub_id,
+                                        )
+                                        .await;
+                                    stop_hook_active = true;
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                    // localcode completion gate: the model wants to END a turn that
+                    // changed code. Run the project's own typecheck/build and scan the
+                    // diff for placeholders; if either is red, send it back (bounded).
+                    if !stop_outcome.should_block
+                        && !stop_outcome.should_stop
+                        && !matches!(turn_context.session_source, SessionSource::SubAgent(_))
+                    {
+                        // Files touched this turn by ANY means (apply_patch, shell
+                        // heredocs, generators): the diff tracker only sees patches.
+                        let cwd = turn_context.cwd.to_path_buf();
+                        let changed = localcode_files_changed_since(&cwd, localcode_turn_started);
+                        if !changed.is_empty() {
+                            let mut pushback: Option<String> = None;
+                            if !stub_nudge_done {
+                                let stubs = localcode_stub_lines_in_files(&changed);
+                                if !stubs.is_empty() {
+                                    stub_nudge_done = true;
+                                    pushback = Some(format!(
+                                        "SYSTEM: your changes still contain placeholders — the user asked for complete, working features, not stubs:\n{}\nImplement each one for real (reopen it as a plan item if needed), or tell the user explicitly which requirement you cannot meet and why.",
+                                        stubs.join("\n")
+                                    ));
+                                }
+                            }
+                            if pushback.is_none() && build_verify_nudges < LOCALCODE_MAX_BUILD_VERIFY {
+                                if let Some(check) = localcode_project_check(&cwd) {
+                                    sess.send_event(
+                                        &turn_context,
+                                        EventMsg::Warning(WarningEvent {
+                                            message: format!("Verifying — running `{check}`…"),
+                                        }),
+                                    )
+                                    .await;
+                                    if let Some(errors) = localcode_run_check(&cwd, &check).await {
+                                        build_verify_nudges += 1;
+                                        pushback = Some(format!(
+                                            "SYSTEM: the project's typecheck/build (`{check}`) was run for you and reported errors. FIX each one with targeted edits, then finish. Do not claim it works until these are gone:\n\n{errors}"
+                                        ));
+                                    }
+                                }
+                            }
+                            if let Some(text) = pushback {
+                                sess.send_event(
+                                    &turn_context,
+                                    EventMsg::Warning(WarningEvent {
+                                        message: "Not done yet — sending the verification result back to the model.".to_string(),
+                                    }),
+                                )
+                                .await;
+                                let fragment = codex_protocol::items::HookPromptFragment {
+                                    text,
+                                    hook_run_id: "localcode-completion-gate".to_string(),
                                 };
                                 if let Some(message) =
                                     build_hook_prompt_message(std::slice::from_ref(&fragment))
@@ -2959,3 +3033,117 @@ pub(crate) fn get_last_assistant_message_from_turn<'a>(
 #[cfg(test)]
 #[path = "turn_tests.rs"]
 mod tests;
+
+
+/// localcode: added lines in the turn's diff that are placeholders rather than code.
+fn localcode_stub_lines(diff: &str) -> Vec<String> {
+    let markers = ["todo:", "todo ", "fixme", "placeholder", "stub", "not implemented", "demo only", "demo-only", "unimplemented!", "coming soon"];
+    diff.lines()
+        .filter(|l| l.starts_with('+') && !l.starts_with("+++"))
+        .filter(|l| {
+            let low = l.to_lowercase();
+            markers.iter().any(|m| low.contains(m))
+        })
+        .take(12)
+        .map(|l| l.trim_start_matches('+').trim().chars().take(160).collect())
+        .collect()
+}
+
+/// localcode: the project's own check command, if we can tell what kind of project this is.
+fn localcode_project_check(cwd: &std::path::Path) -> Option<String> {
+    if cwd.join("package.json").exists() {
+        let pkg = std::fs::read_to_string(cwd.join("package.json")).unwrap_or_default();
+        if cwd.join("tsconfig.json").exists() && cwd.join("node_modules").exists() {
+            return Some("npx tsc --noEmit -p tsconfig.json".to_string());
+        }
+        if pkg.contains("\"build\"") && cwd.join("node_modules").exists() {
+            return Some("npm run build".to_string());
+        }
+        return None;
+    }
+    if cwd.join("pyproject.toml").exists() || cwd.join("setup.py").exists() || cwd.join("tests").exists() {
+        if cwd.join("tests").exists() {
+            return Some("python3 -m pytest -q -x".to_string());
+        }
+        return Some("python3 -m compileall -q .".to_string());
+    }
+    None
+}
+
+/// localcode: run the check; Some(errors) when it fails, None when it passes or cannot run.
+async fn localcode_run_check(cwd: &std::path::Path, check: &str) -> Option<String> {
+    let fut = tokio::process::Command::new("/bin/sh")
+        .arg("-lc")
+        .arg(check)
+        .current_dir(cwd)
+        .output();
+    match tokio::time::timeout(std::time::Duration::from_secs(300), fut).await {
+        Ok(Ok(out)) if !out.status.success() => {
+            let mut text = String::from_utf8_lossy(&out.stdout).to_string();
+            text.push_str(&String::from_utf8_lossy(&out.stderr));
+            let tail: String = text.lines().rev().take(40).collect::<Vec<_>>().into_iter().rev().collect::<Vec<_>>().join("\n");
+            Some(tail.chars().take(4000).collect())
+        }
+        _ => None,
+    }
+}
+
+
+/// localcode: source files under `cwd` modified at or after `since` (bounded walk).
+fn localcode_files_changed_since(cwd: &std::path::Path, since: std::time::SystemTime) -> Vec<std::path::PathBuf> {
+    const SKIP: [&str; 8] = ["node_modules", ".git", "dist", "build", "target", ".venv", "venv", "__pycache__"];
+    const EXTS: [&str; 14] = ["ts", "tsx", "js", "jsx", "py", "rs", "go", "java", "kt", "swift", "rb", "php", "vue", "svelte"];
+    let mut out = Vec::new();
+    let mut stack = vec![cwd.to_path_buf()];
+    let mut seen = 0usize;
+    while let Some(dir) = stack.pop() {
+        let Ok(entries) = std::fs::read_dir(&dir) else { continue };
+        for entry in entries.flatten() {
+            seen += 1;
+            if seen > 20_000 || out.len() >= 200 {
+                return out;
+            }
+            let path = entry.path();
+            let name = entry.file_name().to_string_lossy().to_string();
+            if path.is_dir() {
+                if !SKIP.contains(&name.as_str()) && !name.starts_with('.') {
+                    stack.push(path);
+                }
+                continue;
+            }
+            let ext_ok = path.extension().and_then(|e| e.to_str()).is_some_and(|e| EXTS.contains(&e));
+            if !ext_ok {
+                continue;
+            }
+            if let Ok(meta) = entry.metadata()
+                && let Ok(modified) = meta.modified()
+                && modified >= since
+            {
+                out.push(path);
+            }
+        }
+    }
+    out
+}
+
+/// localcode: placeholder lines in the given files (bounded).
+fn localcode_stub_lines_in_files(files: &[std::path::PathBuf]) -> Vec<String> {
+    let markers = ["todo:", "todo ", "fixme", "placeholder", "stub", "not implemented", "demo only", "demo-only", "unimplemented!", "coming soon"];
+    let mut hits = Vec::new();
+    for f in files {
+        let Ok(text) = std::fs::read_to_string(f) else { continue };
+        if text.len() > 400_000 {
+            continue;
+        }
+        for line in text.lines() {
+            let low = line.to_lowercase();
+            if markers.iter().any(|m| low.contains(m)) {
+                hits.push(format!("{}: {}", f.display(), line.trim().chars().take(160).collect::<String>()));
+                if hits.len() >= 12 {
+                    return hits;
+                }
+            }
+        }
+    }
+    hits
+}

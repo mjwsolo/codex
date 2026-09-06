@@ -59,6 +59,9 @@ pub(crate) struct SessionState {
     /// completion gate in session/turn.rs refuses to end a turn while items
     /// are still pending (mirrors localcode's agent/loop.py).
     pub(crate) latest_plan: Vec<codex_protocol::plan_tool::PlanItemArg>,
+    /// localcode loop breaker: (turn id, call signature) -> consecutive failures.
+    pub(crate) repeat_guard_turn: String,
+    pub(crate) repeat_guard: HashMap<String, u32>,
 }
 
 impl SessionState {
@@ -95,6 +98,8 @@ impl SessionState {
             granted_permissions_by_environment_id: HashMap::new(),
             next_turn_is_first: true,
             latest_plan: Vec::new(),
+            repeat_guard_turn: String::new(),
+            repeat_guard: HashMap::new(),
         }
     }
 

@@ -17,13 +17,29 @@ use serde_json::Value as JsonValue;
 
 pub struct PlanHandler;
 
-pub struct PlanToolOutput;
+pub struct PlanToolOutput {
+    /// localcode: appended when the model closes a 3+ item plan with no verification step.
+    note: String,
+}
 
 const PLAN_UPDATED_MESSAGE: &str = "Plan updated";
+const LOCALCODE_VERIFY_NOTE: &str = "\n\nNOTE: you just marked a 3+ item plan fully done and none of the items was a verification step. Before you write your final summary, run the project's build/typecheck/tests (or a focused smoke check) to confirm the work actually runs, and re-read the user's original request: every requirement must be implemented for real — no stubs, placeholders or 'demo only' pieces. Reopen anything partial as a plan item. Do not claim it works without verifying.";
+
+fn localcode_verify_note(plan: &[codex_protocol::plan_tool::PlanItemArg]) -> String {
+    use codex_protocol::plan_tool::StepStatus;
+    if plan.len() < 3 || !plan.iter().all(|i| matches!(i.status, StepStatus::Completed)) {
+        return String::new();
+    }
+    let text = plan.iter().map(|i| i.step.to_lowercase()).collect::<Vec<_>>().join(" ");
+    let mentions_verification = ["verif", "test", "build", "typecheck", "smoke", "run the app", "check"]
+        .iter()
+        .any(|k| text.contains(k));
+    if mentions_verification { String::new() } else { LOCALCODE_VERIFY_NOTE.to_string() }
+}
 
 impl ToolOutput for PlanToolOutput {
     fn log_output(&self) -> String {
-        PLAN_UPDATED_MESSAGE.to_string()
+        format!("{PLAN_UPDATED_MESSAGE}{}", self.note)
     }
 
     fn success_for_logging(&self) -> bool {
@@ -31,7 +47,7 @@ impl ToolOutput for PlanToolOutput {
     }
 
     fn to_response_item(&self, call_id: &str, _payload: &ToolPayload) -> ResponseInputItem {
-        let mut output = FunctionCallOutputPayload::from_text(PLAN_UPDATED_MESSAGE.to_string());
+        let mut output = FunctionCallOutputPayload::from_text(format!("{PLAN_UPDATED_MESSAGE}{}", self.note));
         output.success = Some(true);
 
         ResponseInputItem::FunctionCallOutput {
@@ -92,11 +108,12 @@ impl PlanHandler {
 
         let args = parse_update_plan_arguments(&arguments)?;
         session.set_latest_plan(args.plan.clone()).await;
+        let note = localcode_verify_note(&args.plan);
         session
             .send_event(turn.as_ref(), EventMsg::PlanUpdate(args))
             .await;
 
-        Ok(boxed_tool_output(PlanToolOutput))
+        Ok(boxed_tool_output(PlanToolOutput { note }))
     }
 }
 

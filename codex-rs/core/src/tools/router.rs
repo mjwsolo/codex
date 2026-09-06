@@ -31,6 +31,10 @@ use std::sync::atomic::AtomicBool;
 use tokio_util::sync::CancellationToken;
 use tracing::instrument;
 
+/// localcode loop breaker thresholds (nudge at 3 identical failures, reject from 6).
+const LOCALCODE_REPEAT_NUDGE: u32 = 3;
+const LOCALCODE_REPEAT_HARD_STOP: u32 = 6;
+
 pub use crate::tools::context::ToolCallSource;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -364,6 +368,31 @@ impl ToolRouter {
 
         // Keep the legacy ToolInvocation.turn field tied to the same request state until handlers migrate.
         let turn = Arc::clone(&step_context.turn);
+        // localcode loop breaker (ported from localcode agent/loop.py): an
+        // identical (tool, args) call that keeps failing is nudged at 3 and
+        // rejected without running from 6. A benchmark run spent 70 rounds
+        // on one TypeScript error before this existed.
+        let guard_turn_id = turn.sub_id.clone();
+        let guard_sig = format!(
+            "{tool_name}\u{0}{}",
+            match &payload {
+                ToolPayload::Function { arguments } => arguments.clone(),
+                ToolPayload::Custom { input } => input.clone(),
+                _ => String::new(),
+            }
+        );
+        let guard_session = Arc::clone(&session);
+        let prior_failures = guard_session
+            .repeat_guard_count(&guard_turn_id, &guard_sig)
+            .await;
+        if prior_failures >= LOCALCODE_REPEAT_HARD_STOP {
+            let n = guard_session
+                .repeat_guard_failure(&guard_turn_id, &guard_sig)
+                .await;
+            return Err(FunctionCallError::RespondToModel(format!(
+                "REJECTED — HARD STOP: this exact `{tool_name}` call has already failed {n} times this turn with the same arguments, so it was not run again. Repeating it will not change the result. Either make a fundamentally different change first, move on to the next plan item, or stop and tell the user precisely what is blocking you."
+            )));
+        }
         let invocation = ToolInvocation {
             session,
             turn,
@@ -371,14 +400,41 @@ impl ToolRouter {
             cancellation_token,
             tracker,
             call_id,
-            tool_name,
+            tool_name: tool_name.clone(),
             source,
             payload,
         };
 
-        self.registry
+        let outcome = self
+            .registry
             .dispatch_any_with_terminal_outcome(invocation, terminal_outcome_reached)
-            .await
+            .await;
+        match outcome {
+            Ok(result) if result.result.success_for_logging() => {
+                guard_session
+                    .repeat_guard_success(&guard_turn_id, &guard_sig)
+                    .await;
+                Ok(result)
+            }
+            Ok(result) => {
+                let n = guard_session
+                    .repeat_guard_failure(&guard_turn_id, &guard_sig)
+                    .await;
+                if n >= LOCALCODE_REPEAT_NUDGE {
+                    let output = result.result.log_output();
+                    return Err(FunctionCallError::RespondToModel(format!(
+                        "{output}\n\nSYSTEM: this exact `{tool_name}` call has now failed {n} times with the same arguments. Do NOT run it again unchanged. Read the error above, make a different change, or move on to the next plan item and report the blocker."
+                    )));
+                }
+                Ok(result)
+            }
+            Err(err) => {
+                let _ = guard_session
+                    .repeat_guard_failure(&guard_turn_id, &guard_sig)
+                    .await;
+                Err(err)
+            }
+        }
     }
 }
 
