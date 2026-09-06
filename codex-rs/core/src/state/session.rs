@@ -55,6 +55,10 @@ pub(crate) struct SessionState {
     pub(crate) pending_session_start_sources: VecDeque<codex_hooks::SessionStartSource>,
     granted_permissions_by_environment_id: HashMap<String, AdditionalPermissionProfile>,
     next_turn_is_first: bool,
+    /// localcode: the model's latest `update_plan` checklist. The open-todo
+    /// completion gate in session/turn.rs refuses to end a turn while items
+    /// are still pending (mirrors localcode's agent/loop.py).
+    pub(crate) latest_plan: Vec<codex_protocol::plan_tool::PlanItemArg>,
 }
 
 impl SessionState {
@@ -90,6 +94,7 @@ impl SessionState {
             pending_session_start_sources: VecDeque::new(),
             granted_permissions_by_environment_id: HashMap::new(),
             next_turn_is_first: true,
+            latest_plan: Vec::new(),
         }
     }
 

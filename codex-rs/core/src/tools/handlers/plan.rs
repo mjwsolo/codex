@@ -91,6 +91,7 @@ impl PlanHandler {
         }
 
         let args = parse_update_plan_arguments(&arguments)?;
+        session.set_latest_plan(args.plan.clone()).await;
         session
             .send_event(turn.as_ref(), EventMsg::PlanUpdate(args))
             .await;

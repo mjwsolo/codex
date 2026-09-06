@@ -4494,6 +4494,17 @@ impl Session {
         state.record_mcp_dependency_prompted(names);
     }
 
+    /// localcode: remember the latest `update_plan` checklist for the
+    /// open-todo completion gate.
+    pub(crate) async fn set_latest_plan(&self, plan: Vec<codex_protocol::plan_tool::PlanItemArg>) {
+        let mut state = self.state.lock().await;
+        state.latest_plan = plan;
+    }
+
+    pub(crate) async fn latest_plan(&self) -> Vec<codex_protocol::plan_tool::PlanItemArg> {
+        self.state.lock().await.latest_plan.clone()
+    }
+
     pub(crate) async fn set_server_reasoning_included(&self, included: bool) {
         let mut state = self.state.lock().await;
         state.set_server_reasoning_included(included);

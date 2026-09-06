@@ -136,6 +136,10 @@ use tracing::trace;
 use tracing::trace_span;
 use tracing::warn;
 
+/// localcode open-todo gate bounds (same numbers as localcode agent/loop.py).
+const LOCALCODE_MAX_PLAN_CONTINUATIONS: usize = 15;
+const LOCALCODE_MAX_PLAN_STUCK: usize = 3;
+
 const POST_SAMPLING_TOKEN_ESTIMATE_TARGET: &str = "codex_core::post_sampling_token_estimate";
 
 /// Explicit MCP startup requirements retained across restarts within one user turn.
@@ -317,6 +321,12 @@ pub(crate) async fn run_turn(
 
     let mut last_agent_message: Option<String> = None;
     let mut stop_hook_active = false;
+    // localcode open-todo completion gate (ported from localcode agent/loop.py):
+    // bounded continuations plus a diminishing-returns guard so a model that
+    // cannot advance its own plan is not nagged forever.
+    let mut plan_continue_count: usize = 0;
+    let mut plan_stuck_count: usize = 0;
+    let mut plan_last_remaining: usize = usize::MAX;
     // Although from the perspective of codex.rs, TurnDiffTracker has the lifecycle of a Task which contains
     // many turns, from the perspective of the user, it is a single turn.
     let turn_diff_tracker = Arc::new(tokio::sync::Mutex::new(
@@ -562,6 +572,77 @@ pub(crate) async fn run_turn(
                         return Err(CodexErr::InvalidRequest(
                             "Memory consolidation was rejected by a Stop hook.".to_string(),
                         ));
+                    }
+                    // localcode: the model wants to END the turn while its own
+                    // update_plan checklist still has open items. That is stopping
+                    // early — push it back to the next item (bounded).
+                    if !stop_outcome.should_block
+                        && !stop_outcome.should_stop
+                        && !matches!(turn_context.session_source, SessionSource::SubAgent(_))
+                    {
+                        let plan = sess.latest_plan().await;
+                        let open: Vec<&codex_protocol::plan_tool::PlanItemArg> = plan
+                            .iter()
+                            .filter(|item| {
+                                !matches!(item.status, codex_protocol::plan_tool::StepStatus::Completed)
+                            })
+                            .collect();
+                        let remaining = open.len();
+                        if remaining > 0
+                            && plan_continue_count < LOCALCODE_MAX_PLAN_CONTINUATIONS
+                            && plan_stuck_count < LOCALCODE_MAX_PLAN_STUCK
+                        {
+                            if remaining >= plan_last_remaining {
+                                plan_stuck_count += 1;
+                            } else {
+                                plan_stuck_count = 0;
+                            }
+                            plan_last_remaining = remaining;
+                            if plan_stuck_count < LOCALCODE_MAX_PLAN_STUCK {
+                                plan_continue_count += 1;
+                                let next = open
+                                    .iter()
+                                    .find(|item| {
+                                        matches!(
+                                            item.status,
+                                            codex_protocol::plan_tool::StepStatus::InProgress
+                                        )
+                                    })
+                                    .or_else(|| open.first())
+                                    .map(|item| item.step.clone())
+                                    .unwrap_or_else(|| "the next item".to_string());
+                                let text = format!(
+                                    "SYSTEM: You still have {remaining} unfinished plan item(s). The task is NOT complete — do not stop. Continue now with: {next}. Mark an item completed via update_plan only when it is genuinely done, and keep going until every item is completed."
+                                );
+                                sess.send_event(
+                                    &turn_context,
+                                    EventMsg::Warning(WarningEvent {
+                                        message: format!(
+                                            "{remaining} plan item(s) still open — continuing (not stopping early)."
+                                        ),
+                                    }),
+                                )
+                                .await;
+                                let fragment = codex_protocol::items::HookPromptFragment {
+                                    text,
+                                    hook_run_id: "localcode-plan-gate".to_string(),
+                                };
+                                if let Some(message) =
+                                    build_hook_prompt_message(std::slice::from_ref(&fragment))
+                                {
+                                    sess.record_response_item_and_emit_turn_item(&turn_context, message)
+                                        .await;
+                                    sess.input_queue
+                                        .accept_mailbox_delivery_for_current_turn(
+                                            &sess.active_turn,
+                                            &turn_context.sub_id,
+                                        )
+                                        .await;
+                                    stop_hook_active = true;
+                                    continue;
+                                }
+                            }
+                        }
                     }
                     if stop_outcome.should_block {
                         if let Some(hook_prompt_message) =
